@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from psycopg import AsyncConnection
 from ..db import get_conn
 from ..schemas.studio import StudioOut, StudioIn
+from ..schemas.pagination import Page, PageMeta
 from ..services.studios import StudioService
 from ..settings import settings
 
@@ -17,6 +18,14 @@ async def get_studio(subdomain: str, svc: StudioService = Depends(get_service)):
     if not studio:
         raise HTTPException(status_code=404, detail="Studio not found")
     return studio
+
+@router.get("", response_model=Page)  # returns { data: [...], pagination: {...} }
+async def list_studios(limit: int = 20, offset: int = 0, svc: StudioService = Depends(get_service)):
+    data, total, next_offset = await svc.list(limit=limit, offset=offset)
+    return Page(
+        data=[StudioOut(**s) for s in data],
+        pagination=PageMeta(limit=limit, offset=offset, total=total, next_offset=next_offset),
+    )
 
 @router.post("", response_model=StudioOut, status_code=201)
 async def create_studio(payload: StudioIn, svc: StudioService = Depends(get_service)):

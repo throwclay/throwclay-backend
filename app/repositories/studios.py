@@ -36,3 +36,22 @@ class StudioRepository:
                 (name, subdomain.lower(), timezone),
             )
             return await cur.fetchone()
+
+    async def list(self, *, limit: int, offset: int) -> list[dict]:
+        async with dict_cursor(self.conn) as cur:
+            await cur.execute(
+                """
+                select id, name, subdomain, timezone, created_at
+                from public.studio
+                order by created_at desc
+                limit %s offset %s
+                """,
+                (limit, offset),
+            )
+            return await cur.fetchall()
+
+    async def count_all(self) -> int:
+        async with dict_cursor(self.conn) as cur:
+            await cur.execute("select count(*) as n from public.studio")
+            row = await cur.fetchone()
+            return int(row["n"])

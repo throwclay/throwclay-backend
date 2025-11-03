@@ -13,10 +13,6 @@ class StudioService:
     async def get_by_subdomain(self, subdomain: str):
         return await self.repo.get_by_subdomain(subdomain)
 
-    async def list(self, limit: int = 50, offset: int = 0):
-        # optional list impl
-        raise NotImplementedError
-
     async def create(self, payload: StudioIn) -> dict:
         # Example business rule: unique subdomain (409 if taken)
         if await self.repo.exists_subdomain(payload.subdomain):
@@ -30,3 +26,9 @@ class StudioService:
             timezone=payload.timezone,
         )
         return created
+
+    async def list(self, *, limit: int, offset: int) -> tuple[list[dict], int, int | None]:
+        data = await self.repo.list(limit=limit, offset=offset)
+        total = await self.repo.count_all()
+        next_offset = offset + limit if (offset + limit) < total else None
+        return data, total, next_offset
