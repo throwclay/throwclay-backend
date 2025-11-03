@@ -15,7 +15,6 @@ class StudioRepository:
             await cur.execute(
                 """
                 select id, name, subdomain, timezone,
-                    payment_provider, payment_account_ref, payment_settings,
                     created_at
                 from public.studio
                 where subdomain = %s
@@ -31,7 +30,6 @@ class StudioRepository:
             await cur.execute(
                 """
                 select id, name, subdomain, timezone,
-                       payment_provider, payment_account_ref, payment_settings,
                        created_at
                 from public.studio
                 order by created_at desc

@@ -8,7 +8,4 @@ class StudioOut(BaseModel):
     name: str
     subdomain: str
     timezone: str
-    payment_provider: str | None = None
-    payment_account_ref: str | None = None
-    payment_settings: dict | None = None
     created_at: datetime
