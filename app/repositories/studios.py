@@ -4,18 +4,14 @@ from psycopg import AsyncConnection
 from ..db import dict_cursor
 
 class StudioRepository:
-    def __init__(self, conn: AsyncConnection, statement_timeout_ms: int = 3000):
+    def __init__(self, conn: AsyncConnection):
         self.conn = conn
-        self.stmt_timeout = statement_timeout_ms
 
-    async def get_by_subdomain(self, subdomain: str):
+    async def get_by_subdomain(self, subdomain: str) -> Optional[dict[str, Any]]:
         async with dict_cursor(self.conn) as cur:
-            # was: await cur.execute("SET LOCAL statement_timeout = %s", (self.stmt_timeout,))
-            await cur.execute(f"SET statement_timeout = {int(self.stmt_timeout)}")
             await cur.execute(
                 """
-                select id, name, subdomain, timezone,
-                    created_at
+                select id, name, subdomain, timezone, created_at
                 from public.studio
                 where subdomain = %s
                 limit 1
@@ -24,17 +20,19 @@ class StudioRepository:
             )
             return await cur.fetchone()
 
-    async def list(self, limit: int = 50, offset: int = 0) -> list[dict]:
+    async def exists_subdomain(self, subdomain: str) -> bool:
         async with dict_cursor(self.conn) as cur:
-            await cur.execute(f"SET statement_timeout = {int(self.stmt_timeout)}")
+            await cur.execute("select 1 from public.studio where subdomain = %s", (subdomain.lower(),))
+            return (await cur.fetchone()) is not None
+
+    async def insert(self, *, name: str, subdomain: str, timezone: str) -> dict[str, Any]:
+        async with dict_cursor(self.conn) as cur:
             await cur.execute(
                 """
-                select id, name, subdomain, timezone,
-                       created_at
-                from public.studio
-                order by created_at desc
-                limit %s offset %s
+                insert into public.studio (name, subdomain, timezone)
+                values (%s, %s, %s)
+                returning id, name, subdomain, timezone, created_at
                 """,
-                (limit, offset),
+                (name, subdomain.lower(), timezone),
             )
-            return await cur.fetchall()
+            return await cur.fetchone()
