@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     # Optional extras you already have in .env
     supabase_url: str | None = None                 # SUPABASE_URL
     supabase_service_role_key: str | None = None    # SUPABASE_SERVICE_ROLE_KEY
+    supabase_jwt_secret: str | None = None  # env: SUPABASE_JWT_SECRET
 
     # Read raw CORS env (string or list), then normalize
     cors_origins_raw: str | List[str] | None = Field(

@@ -6,6 +6,7 @@ from ..schemas.studio import StudioOut, StudioIn
 from ..schemas.pagination import Page, PageMeta
 from ..services.studios import StudioService
 from ..settings import settings
+from ..auth.roles import require_roles_any
 
 router = APIRouter(prefix="/api/studios", tags=["studios"])
 
@@ -27,6 +28,10 @@ async def list_studios(limit: int = 20, offset: int = 0, svc: StudioService = De
         pagination=PageMeta(limit=limit, offset=offset, total=total, next_offset=next_offset),
     )
 
-@router.post("", response_model=StudioOut, status_code=201)
-async def create_studio(payload: StudioIn, svc: StudioService = Depends(get_service)):
+@router.post("", response_model=StudioOut, status_code=201)  # admin/owner only
+async def create_studio(
+    payload: StudioIn,
+    svc: StudioService = Depends(get_service),
+    user = Depends(require_roles_any("admin", "owner")),
+):
     return await svc.create(payload)
