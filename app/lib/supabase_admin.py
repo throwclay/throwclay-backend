@@ -18,7 +18,7 @@ async def admin_create_user(email: str) -> dict:
     """
     async with httpx.AsyncClient(timeout=10) as client:
         r = await client.post(f"{BASE}/auth/v1/admin/users", headers=HEADERS, json={"email": email})
-        # If user exists, GoTrue may return 422/409; decide how to handle in service.
+        # If user exists, may return 422/409; TODO: decide how to handle in service.
         r.raise_for_status()
         return r.json()
 

@@ -21,14 +21,14 @@ class InviteService:
             u = await admin_create_user(email)
             user_id = u["id"]
         except Exception as e:
-            # If already exists, you can prompt accept flow or (optionally) fetch by email if your GoTrue version allows.
+            # If already exists, we can prompt accept flow or (optionally) fetch by email
             raise HTTPException(status_code=400, detail="Unable to create/invite user") from e
 
-        # Optionally send an invite email via GoTrue (magic link)
+        # Optionally send an invite email via magic link
         try:
             await admin_invite_user(email)
         except Exception:
-            # Non-fatal; membership can still be created. You might log this.
+            # Non-fatal; membership can still be created
             pass
 
         # Upsert membership as 'invited'

@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     version: str = "0.1.0"
     database_url: str  # DATABASE_URL
 
-    # Optional extras you already have in .env
+    # Optional extras we already have in .env
     supabase_url: str | None = None                 # SUPABASE_URL
     supabase_service_role_key: str | None = None    # SUPABASE_SERVICE_ROLE_KEY
     supabase_jwt_secret: str | None = None  # env: SUPABASE_JWT_SECRET
